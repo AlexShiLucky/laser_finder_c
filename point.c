@@ -257,5 +257,51 @@ int sort_by_col(int (*center_points)[2], int num_points, int* col_idx, int col_i
   return num_col;
 }
 
+int sort_by_row(int (*center_points)[2], const int num_points, int* row_idx, int row_idx_size)
+{
+  int num_row = 0;
+  int working_array_x[num_points]; // array for copying data points
+  int working_array_y[num_points]; // array for copying data points
+  int min = center_points[0][0];
+  int max = min;
+
+  row_idx[0] = 0; // first row always starts at first element
+
+  // sort by row
+  // copy into dummy arrays and find max and min x values
+  for(int i = 0; i < num_points; i++) {
+    working_array_x[i] = center_points[i][0];
+    working_array_y[i] = center_points[i][1];
+    if(working_array_x[i] < min) {
+      min = working_array_x[i];
+    }
+    if(working_array_x[i] > max) {
+      max = working_array_x[i];
+    }
+  }
+  int idx = 0;
+
+  for(int val = min; val <= max; val++) {
+    for(int i = 0; i < num_points; i++) {
+      if(working_array_x[i] == val) {
+        center_points[idx][0] = working_array_x[i];
+        center_points[idx][1] = working_array_y[i];
+        idx++;
+      }
+    }
+  }
+
+  for(int i = 1; i < num_points; i++) // i - point number
+  {
+    if(abs(center_points[i][0] - center_points[i-1][0]) > ROW_THRESHOLD) { 
+      // new row
+      num_row++;
+      //printf("%d, %d, %d\r\n", center_points[i][0], center_points[i-1][0], abs(center_points[i][0] - center_points[i-1][0]));
+      row_idx[num_row] = i;
+    }
+  }
+
+  return num_row;
+}
 
 

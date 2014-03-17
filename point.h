@@ -1,8 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
 
-#define DEBUG_FILE
-
 #define WIDTH 640
 #define HEIGHT  480
 #define NUM_PIXELS  (WIDTH*HEIGHT)
@@ -17,6 +15,7 @@
 #define MAX_SKEW  5
 
 #define COL_THRESHOLD 20  // threshold for being in the same column
+#define ROW_THRESHOLD 20
 
 struct Point {
   int min[2];
@@ -47,5 +46,10 @@ int point_finder(int (*center_points)[2], int length);
  * @returns number of columns         
 */
 int sort_by_col(int (*center_points)[2], int num_points, int* col_idx, int col_idx_size);
+
+/**
+ * assumes points are already sorted in rows (that's how their read)
+ */
+int sort_by_row(int (*center_points)[2], const int num_points, int* row_idx, int row_idx_size);
 
 #endif //POINT_H
