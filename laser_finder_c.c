@@ -6,7 +6,7 @@
 #define POINT_BUFFER_LENGTH   200
 #define MAX_COLUMNS           30
 
-int main()
+int main(void)
 {
   int center_points[POINT_BUFFER_LENGTH][2];
   int num_points = 0;

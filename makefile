@@ -1,5 +1,5 @@
 TARGET		= laser_finder_c
-OBJECTS 	= laser_finder_c.o dots_img.o no_dots_img.o point.o memory.o
+OBJECTS 	= dots_img.o no_dots_img.o point.o memory.o laser_finder_c.o 
 #######################################################################################
 CFLAGS   = -g -Wall
 ASFLAGS  = -Wall
