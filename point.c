@@ -89,6 +89,14 @@ int test_shape(struct Point *p)
   return 1;
 }
 
+int in_points(int (*points)[2], int length, int *center) {
+  for(int i = 0; i < length; i++) {
+    if(center[0] == points[i][0] && center[1] == points[i][1])
+      return 1;
+  }
+  return 0;
+}
+
 int point_finder(int (*center_points)[2], int length)
 {
   // point finder variables
@@ -118,7 +126,7 @@ int point_finder(int (*center_points)[2], int length)
     for(int x=0; x<WIDTH; x++) {
       if(*(working_line+x) > threshold_C)
       {
-        if(left == -1) // new line
+        if(left == -1) // new line of high values
         {
           left = right = y*WIDTH + x;
         }
@@ -128,53 +136,101 @@ int point_finder(int (*center_points)[2], int length)
         }
       } else if(left != -1) {
         bool found = false;
-        for(int j=left_point; j<=right_point;j++)
+        for(int j=0; j<=right_point;j++)
         {
           if(point_status[j] == active_C)
           {
             int test = test_point(&points[j], left);
             if(test == 1)
             {
-              add_line(&points[j], left,right);
+              add_line(&points[j],left,right);
               found = true;
               break;
             } else if (test == -1) {
-              // point should be consemated
-              if(j == left_point)
-                left_point++;
-              point_status[j] = consemated_C;
+              // point should be consemated - we went past this point
+              int shape = test_shape(&points[j]); // test the shape
+              if(shape == 1) {
+                get_center(&points[j]); // calculates the center points
+                printf("Good Shape (%d,%d)\n", points[j].center[0], points[j].center[1]);
+                if(num_centers == length) {
+                  printf("Out of memory in center_points\n");
+                  continue;
+                }
+                if(!in_points(center_points,length,points[j].center)) {
+                  center_points[num_centers][0] = points[j].center[0];
+                  center_points[num_centers][1] = points[j].center[1];
+                  num_centers++;
+                }
+              }
+              // free the point
+              point_status[j] = unused_C;
+              init_point(&points[j]);
             }
           }
         }
         if(!found)
         {
-          right_point++;
-          point_status[right_point] = active_C;
-          add_line(&points[right_point], left, right);
+          // reuse unused points
+          int found_unused = 0;
+          for(int j = 0; j <= right_point; j++) {
+            if(point_status[j] == unused_C) {
+              found_unused = 1;
+              point_status[j] = active_C;
+              add_line(&points[j], left, right);
+            }
+          }
+
+          if(right_point == length)
+            printf("Need more memory!\n");
+
+          if(found_unused == 0 && right_point < length) { // get new point (bounded, safe)
+            right_point++;
+            point_status[right_point] = active_C;
+            add_line(&points[right_point], left, right);
+          }
+
         }
         left = -1;
       }
     }
   }
-  for(int i = left_point; i <= right_point; i++)
-    point_status[i] = consemated_C;
-  for(int i = 0; i < 100 && point_status[i] != unused_C; i++)
-  { 
-    int* center = get_center(&points[i]);
-    int test = test_shape(&points[i]);
-    if(test < 0) // bad
-    {
-      point_status[i] = bad_C;
-      // printf("%d(%d): (%d,%d) - bad (%d)\n", i, point_status[i], *center, *(center+1), test);
-      continue;
-    } else {
-      center_points[num_centers][0] = *center;
-      center_points[num_centers][1] = *(center+1);
-      num_centers++;
-    }
-    //printf("%d(%d): (%d,%d)\n", i, point_status[i], *center, *(center+1));
+
+#ifdef DEBUG_FILE
+  FILE *f = fopen("working.txt", "w");
+  if (f == NULL)
+  {
+    printf("Error opening file!\n");
+    exit(1);
   }
+
+  reset_address();
+
+  fprintf(f, "/* green values only, 640 x 480 pix */ \n\n");
+  for(int i=1; i < (NUM_PIXELS); i++)
+  {
+    if(XVAL(i) == 0)
+      read_filtered_line(working_line);
+    bool center = false;
+    if(i != 0 && (i-1)%(WIDTH) == 0)
+      fprintf(f, "\n");
+    for(int j = 0; j < num_centers; j++)
+    {
+      if(XVAL(i) == center_points[j][0] && YVAL(i) == center_points[j][1])
+      {
+        fprintf(f, "XXX,");
+        center = true;
+        break;
+      }
+    }
+    if(!center)
+      fprintf(f,"%3d,",working_line[XVAL(i)]);
+    center = false;
+  }
+
+  fclose(f);
+#endif
   
+  printf("Right Point: %d\n", right_point);
   return num_centers;
 }
 

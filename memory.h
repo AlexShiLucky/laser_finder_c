@@ -14,5 +14,6 @@ struct image {
 }; 
 
 void read_filtered_line(unsigned char *result);
+void reset_address();
 
 #endif // MEMORY_H

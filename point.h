@@ -1,6 +1,8 @@
 #ifndef POINT_H
 #define POINT_H
 
+#define DEBUG_FILE
+
 #define WIDTH 640
 #define HEIGHT  480
 #define NUM_PIXELS  (WIDTH*HEIGHT)
@@ -8,7 +10,7 @@
 #define XVAL(idx) (idx%WIDTH)
 #define YVAL(idx) (idx/WIDTH)
 
-#define THRESHOLD 10  // threshold for point test
+#define THRESHOLD 15  // threshold for point test
 #define MIN_SIZE  3
 #define MAX_SIZE  (30*30)
 #define MIN_SKEW  -5

@@ -19,3 +19,7 @@ void read_filtered_line(unsigned char *result) {
   }
   location += WIDTH*3;
 }
+
+void reset_address() {
+  location = 0;
+}
